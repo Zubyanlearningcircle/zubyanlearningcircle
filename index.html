@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zubyan Learning Circle - Current Affairs</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#f4f6f9;
+}
+
+header{
+background:#0d47a1;
+color:white;
+padding:20px;
+text-align:center;
+}
+
+nav{
+background:#1565c0;
+padding:10px;
+text-align:center;
+}
+
+nav a{
+color:white;
+margin:0 15px;
+text-decoration:none;
+font-weight:bold;
+}
+
+.hero{
+padding:50px;
+text-align:center;
+background:linear-gradient(to right,#1565c0,#42a5f5);
+color:white;
+}
+
+.container{
+width:90%;
+margin:auto;
+padding:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:15px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.section-title{
+color:#0d47a1;
+margin:20px 0;
+}
+
+.amu-box{
+background:#fff3cd;
+border:2px solid #ffc107;
+padding:20px;
+border-radius:12px;
+text-align:center;
+margin-top:30px;
+}
+
+.btn{
+background:#28a745;
+color:white;
+padding:12px 20px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+margin-top:10px;
+}
+
+.btn:hover{
+background:#1e7e34;
+}
+
+.search{
+width:100%;
+padding:10px;
+margin-bottom:15px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+.paper{
+background:white;
+padding:15px;
+border-radius:10px;
+margin-bottom:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.locked{
+color:red;
+font-weight:bold;
+}
+
+.unlocked{
+color:green;
+font-weight:bold;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+<h1>Zubyan Learning Circle</h1>
+<p>Current Affairs | AMU Entrance Preparation</p>
+</header>
+
+<nav>
+<a href="#">Home</a>
+<a href="#">Current Affairs</a>
+<a href="#">AMU Papers</a>
+</nav>
+
+<div class="hero">
+<h2>Daily Current Affairs + AMU Prep Portal</h2>
+<p>UPSC | SSC | AMU | CUET Students Hub</p>
+</div>
+
+<div class="container">
+
+<h2 class="section-title">Latest Current Affairs</h2>
+
+<div class="grid">
+<div class="card">National News Updates</div>
+<div class="card">International Affairs</div>
+<div class="card">Sports News</div>
+<div class="card">Government Schemes</div>
+</div>
+
+<!-- AMU SECTION -->
+<div class="amu-box">
+
+<h2>🔥 AMU Previous Year Papers</h2>
+<p>Unlock all papers for only <b>₹10</b></p>
+
+<button class="btn" onclick="payNow()">
+Pay ₹10 & Unlock
+</button>
+
+<p id="status"></p>
+
+</div>
+
+<br>
+
+<input class="search" onkeyup="searchPapers()" placeholder="Search AMU Papers...">
+
+<div id="papers">
+
+<div class="paper">
+<span>AMU Paper 2023</span>
+<button class="btn" onclick="downloadPaper('2023')">Download</button>
+</div>
+
+<div class="paper">
+<span>AMU Paper 2022</span>
+<button class="btn" onclick="downloadPaper('2022')">Download</button>
+</div>
+
+<div class="paper">
+<span>AMU Paper 2021</span>
+<button class="btn" onclick="downloadPaper('2021')">Download</button>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+// check payment status
+let paid = localStorage.getItem("amu_paid");
+
+if(paid){
+document.getElementById("status").innerHTML =
+"<span class='unlocked'>Unlocked ✔ You can download papers</span>";
+}
+
+// UPI Payment
+function payNow(){
+alert("Redirecting to UPI Payment (₹10)");
+
+window.location.href =
+"upi://pay?pa=7037905285@paytm&pn=Zubyan%20Learning%20Circle&am=10&cu=INR";
+
+// simulate unlock (frontend only)
+setTimeout(()=>{
+localStorage.setItem("amu_paid","yes");
+document.getElementById("status").innerHTML =
+"<span class='unlocked'>Payment Successful (Demo) ✔ Unlocked</span>";
+},3000);
+}
+
+// download function
+function downloadPaper(year){
+
+if(!localStorage.getItem("amu_paid")){
+alert("Please pay ₹10 to unlock downloads");
+return;
+}
+
+alert("Downloading AMU Paper " + year);
+
+// demo file link (replace later with real PDFs)
+window.open("https://example.com/amu-"+year+".pdf","_blank");
+}
+
+// search filter
+function searchPapers(){
+let input = document.querySelector(".search").value.toLowerCase();
+let papers = document.querySelectorAll(".paper");
+
+papers.forEach(p=>{
+let text = p.innerText.toLowerCase();
+p.style.display = text.includes(input) ? "flex" : "none";
+});
+}
+
+</script>
+
+</body>
+</html>
