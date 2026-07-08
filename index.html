@@ -89,14 +89,6 @@ transition:background 0.3s;
 background:#1e7e34;
 }
 
-.razorpay-btn{
-background:#1f3a7d;
-}
-
-.razorpay-btn:hover{
-background:#2c5aa0;
-}
-
 .search{
 width:100%;
 padding:10px;
@@ -159,42 +151,105 @@ gap:10px;
 font-size:24px;
 }
 
-.payment-status{
-margin-top:10px;
-font-weight:bold;
-}
-
-.modal{
+.payment-modal{
 display:none;
 position:fixed;
-z-index:1;
-left:0;
 top:0;
+left:0;
 width:100%;
 height:100%;
-background-color:rgba(0,0,0,0.4);
+background:rgba(0,0,0,0.7);
+z-index:1000;
+justify-content:center;
+align-items:center;
 }
 
-.modal-content{
-background-color:#fefefe;
-margin:15% auto;
-padding:20px;
-border:1px solid #888;
-width:80%;
-max-width:400px;
-border-radius:10px;
+.payment-modal.show{
+display:flex;
 }
 
-.close{
-color:#aaa;
-float:right;
-font-size:28px;
+.modal-box{
+background:white;
+padding:30px;
+border-radius:15px;
+max-width:500px;
+text-align:center;
+box-shadow:0 5px 20px rgba(0,0,0,0.3);
+}
+
+.modal-box h2{
+color:#0d47a1;
+margin-bottom:20px;
+}
+
+.modal-box p{
+font-size:18px;
+margin:15px 0;
+color:#333;
+}
+
+.price{
+font-size:36px;
 font-weight:bold;
-cursor:pointer;
+color:#e74c3c;
+margin:20px 0;
 }
 
-.close:hover{
-color:black;
+.modal-buttons{
+display:flex;
+gap:10px;
+margin-top:25px;
+}
+
+.modal-buttons button{
+flex:1;
+padding:12px;
+font-size:16px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.pay-btn{
+background:#1f3a7d;
+color:white;
+transition:background 0.3s;
+}
+
+.pay-btn:hover{
+background:#2c5aa0;
+}
+
+.cancel-btn{
+background:#95a5a6;
+color:white;
+transition:background 0.3s;
+}
+
+.cancel-btn:hover{
+background:#7f8c8d;
+}
+
+.loading{
+display:none;
+text-align:center;
+padding:20px;
+}
+
+.spinner{
+border:4px solid #f3f3f3;
+border-top:4px solid #0d47a1;
+border-radius:50%;
+width:40px;
+height:40px;
+animation:spin 1s linear infinite;
+margin:0 auto;
+}
+
+@keyframes spin{
+0% { transform:rotate(0deg); }
+100% { transform:rotate(360deg); }
 }
 
 </style>
@@ -235,14 +290,6 @@ color:black;
 <h2>📚 Syllabus & Study Materials</h2>
 <p>Premium university syllabus and study materials</p>
 
-<div class="amu-box">
-<p>Unlock all study materials for only <b>₹5</b></p>
-<button class="btn razorpay-btn" onclick="paySyllabus()">
-💳 Pay ₹5 & Unlock
-</button>
-<p id="syllabus-status"></p>
-</div>
-
 <ul class="pdf-list" id="syllabusSection">
 
 <li class="pdf-item">
@@ -250,7 +297,7 @@ color:black;
 <span class="pdf-icon">📄</span>
 <strong>Jamia Millia BA Syllabus</strong>
 </span>
-<button class="btn" onclick="downloadSyllabus('jamia')">Download PDF</button>
+<button class="btn" onclick="initiateDownload('jamia', 'syllabus', 5)">Download PDF (₹5)</button>
 </li>
 
 </ul>
@@ -262,12 +309,6 @@ color:black;
 <h2>🔥 AMU Previous Year Papers</h2>
 <p>Unlock all papers for only <b>₹10</b></p>
 
-<button class="btn razorpay-btn" onclick="payAMU()">
-💳 Pay ₹10 & Unlock
-</button>
-
-<p id="status"></p>
-
 </div>
 
 <br>
@@ -278,21 +319,40 @@ color:black;
 
 <div class="paper">
 <span>AMU Paper 2023</span>
-<button class="btn" onclick="downloadPaper('2023')">Download</button>
+<button class="btn" onclick="initiateDownload('2023', 'paper', 10)">Download (₹10)</button>
 </div>
 
 <div class="paper">
 <span>AMU Paper 2022</span>
-<button class="btn" onclick="downloadPaper('2022')">Download</button>
+<button class="btn" onclick="initiateDownload('2022', 'paper', 10)">Download (₹10)</button>
 </div>
 
 <div class="paper">
 <span>AMU Paper 2021</span>
-<button class="btn" onclick="downloadPaper('2021')">Download</button>
+<button class="btn" onclick="initiateDownload('2021', 'paper', 10)">Download (₹10)</button>
 </div>
 
 </div>
 
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="payment-modal" id="paymentModal">
+<div class="modal-box">
+<h2>💳 Payment Required</h2>
+<p id="modalMessage">To download this file, please complete the payment</p>
+<div class="price" id="priceDisplay">₹5</div>
+
+<div class="loading" id="loading">
+<div class="spinner"></div>
+<p>Processing payment...</p>
+</div>
+
+<div class="modal-buttons" id="modalButtons">
+<button class="pay-btn" onclick="processPayment()">💳 Proceed to Pay</button>
+<button class="cancel-btn" onclick="closePaymentModal()">Cancel</button>
+</div>
+</div>
 </div>
 
 <!-- Razorpay Script -->
@@ -300,79 +360,94 @@ color:black;
 
 <script>
 
-// Check payment status on page load
-let syllabusPaid = localStorage.getItem("syllabus_paid");
-let amuPaid = localStorage.getItem("amu_paid");
+let pendingDownload = null;
 
-if(syllabusPaid){
-document.getElementById("syllabus-status").innerHTML =
-"<span class='unlocked'>✔ Unlocked - Access all materials</span>";
+function initiateDownload(fileId, type, price){
+pendingDownload = {
+fileId: fileId,
+type: type,
+price: price
+};
+
+showPaymentModal(fileId, type, price);
 }
 
-if(amuPaid){
-document.getElementById("status").innerHTML =
-"<span class='unlocked'>✔ Unlocked - Download papers</span>";
+function showPaymentModal(fileId, type, price){
+let message = "";
+if(type === 'syllabus'){
+message = "📚 Download Jamia Millia BA Syllabus";
+} else {
+message = "📄 Download AMU Paper " + fileId;
 }
 
-// ===== SYLLABUS PAYMENT SYSTEM (₹5) =====
-function paySyllabus(){
+document.getElementById("modalMessage").innerText = message;
+document.getElementById("priceDisplay").innerText = "₹" + price;
+document.getElementById("paymentModal").classList.add("show");
+}
+
+function closePaymentModal(){
+document.getElementById("paymentModal").classList.remove("show");
+pendingDownload = null;
+}
+
+function processPayment(){
+if(!pendingDownload) return;
+
+document.getElementById("modalButtons").style.display = "none";
+document.getElementById("loading").style.display = "block";
+
+// Open Razorpay payment page
 window.open("https://razorpay.me/@zubyanlearningcircle", "_blank");
 
-// Alternative: You can also set a specific amount
-// window.open("https://razorpay.me/@zubyanlearningcircle?amount=500", "_blank");
-
-// For now, users will mark as paid manually after payment
+// Wait for user to return after payment
+// Show instruction to click confirm
 setTimeout(()=>{
-let userConfirm = prompt("After completing payment, enter 'yes' to unlock:");
-if(userConfirm && userConfirm.toLowerCase() === 'yes'){
-localStorage.setItem("syllabus_paid","yes");
-document.getElementById("syllabus-status").innerHTML =
-"<span class='unlocked'>✔ Payment Confirmed - Access unlocked!</span>";
-alert("✅ Welcome! You can now download all study materials.");
-}
-},1000);
-}
-
-function downloadSyllabus(name){
-
-if(!localStorage.getItem("syllabus_paid")){
-alert("❌ Please pay ₹5 to unlock downloads. Click 'Pay ₹5 & Unlock' button above.");
-return;
+document.getElementById("loading").innerHTML = `
+<div style="background:#d4edda; border:2px solid #28a745; padding:20px; border-radius:8px; margin-top:15px;">
+<h3 style="color:#155724; margin-top:0;">✅ Payment Complete?</h3>
+<p style="color:#155724; margin:10px 0;">After completing payment on Razorpay, click the button below to verify and download</p>
+<button class="pay-btn" onclick="verifyPaymentAndDownload()" style="width:100%; margin-top:10px; padding:15px;">
+✅ Confirm Payment & Download
+</button>
+</div>
+`;
+}, 2000);
 }
 
-alert("⬇️ Downloading " + name + " syllabus...");
+function verifyPaymentAndDownload(){
+if(!pendingDownload) return;
 
-if(name === 'jamia'){
-window.open("https://github.com/Zubyanlearningcircle/zubyanlearningcircle/raw/main/1763746773087%20-%20JAMIA%20MILLIA%20BA%20SYLLABUS%20(2).pdf","_blank");
-}
-}
-
-// ===== AMU PAPERS PAYMENT SYSTEM (₹10) =====
-function payAMU(){
-window.open("https://razorpay.me/@zubyanlearningcircle", "_blank");
+document.getElementById("loading").innerHTML = `
+<div class="spinner"></div>
+<p>Starting download...</p>
+`;
 
 setTimeout(()=>{
-let userConfirm = prompt("After completing payment, enter 'yes' to unlock:");
-if(userConfirm && userConfirm.toLowerCase() === 'yes'){
-localStorage.setItem("amu_paid","yes");
-document.getElementById("status").innerHTML =
-"<span class='unlocked'>✔ Payment Confirmed - Download papers!</span>";
-alert("✅ Welcome! You can now download all previous year papers.");
+let url = getDownloadURL(pendingDownload.fileId, pendingDownload.type);
+
+// Start download
+window.open(url, "_blank");
+
+// Close modal after 1 second
+setTimeout(()=>{
+closePaymentModal();
+document.getElementById("modalButtons").style.display = "flex";
+document.getElementById("loading").style.display = "none";
+alert("✅ Download started! Check your downloads folder.");
+pendingDownload = null;
+}, 1000);
+}, 500);
 }
-},1000);
+
+function getDownloadURL(fileId, type){
+if(type === 'syllabus' && fileId === 'jamia'){
+return "https://github.com/Zubyanlearningcircle/zubyanlearningcircle/raw/main/1763746773087%20-%20JAMIA%20MILLIA%20BA%20SYLLABUS%20(2).pdf";
 }
 
-function downloadPaper(year){
-
-if(!localStorage.getItem("amu_paid")){
-alert("❌ Please pay ₹10 to unlock downloads. Click 'Pay ₹10 & Unlock' button above.");
-return;
+// Replace with actual PDF URLs when available
+if(type === 'paper'){
+return "https://example.com/amu-"+fileId+".pdf";
 }
-
-alert("⬇️ Downloading AMU Paper " + year);
-
-// Replace with actual PDF links when available
-window.open("https://example.com/amu-"+year+".pdf","_blank");
 }
 
 // search filter
@@ -385,6 +460,13 @@ let text = p.innerText.toLowerCase();
 p.style.display = text.includes(input) ? "flex" : "none";
 });
 }
+
+// Close modal when clicking outside
+document.getElementById("paymentModal").addEventListener("click", function(e){
+if(e.target === this){
+closePaymentModal();
+}
+});
 
 </script>
 
