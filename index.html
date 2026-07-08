@@ -300,6 +300,14 @@ margin:0 auto;
 <button class="btn" onclick="initiateDownload('jamia', 'syllabus', 5)">Download PDF (₹5)</button>
 </li>
 
+<li class="pdf-item">
+<span>
+<span class="pdf-icon">📊</span>
+<strong>Presentation (Study Materials)</strong>
+</span>
+<button class="btn" onclick="initiateDownload('presentation', 'pptx', 5)">Download PPTX (₹5)</button>
+</li>
+
 </ul>
 </div>
 
@@ -376,6 +384,8 @@ function showPaymentModal(fileId, type, price){
 let message = "";
 if(type === 'syllabus'){
 message = "📚 Download Jamia Millia BA Syllabus";
+} else if(type === 'pptx'){
+message = "📊 Download Presentation (Study Materials)";
 } else {
 message = "📄 Download AMU Paper " + fileId;
 }
@@ -442,6 +452,10 @@ pendingDownload = null;
 function getDownloadURL(fileId, type){
 if(type === 'syllabus' && fileId === 'jamia'){
 return "https://github.com/Zubyanlearningcircle/zubyanlearningcircle/raw/main/1763746773087%20-%20JAMIA%20MILLIA%20BA%20SYLLABUS%20(2).pdf";
+}
+
+if(type === 'pptx' && fileId === 'presentation'){
+return "https://github.com/Zubyanlearningcircle/zubyanlearningcircle/raw/main/Presentation%20(1).pptx";
 }
 
 // Replace with actual PDF URLs when available
