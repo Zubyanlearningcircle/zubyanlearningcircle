@@ -4,6 +4,7 @@ birhtday of abdul mubeen is coming soon which is 15th of july
 A comprehensive portal for Current Affairs and AMU Entrance Preparation.
 
 ## Features
+15th july birthday
 
 - 📰 **Daily Current Affairs Updates** - National, International, Sports, and Government Schemes
 - 📚 **AMU Previous Year Papers** - Access to past entrance exam papers
