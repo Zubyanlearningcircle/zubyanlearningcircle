@@ -1,3 +1,4 @@
+birhtday of abdul mubeen is coming soon which is 15th of july
 # Zubyan Learning Circle
 
 A comprehensive portal for Current Affairs and AMU Entrance Preparation.
