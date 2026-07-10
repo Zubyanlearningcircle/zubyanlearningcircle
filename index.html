@@ -353,7 +353,7 @@ margin:0 auto;
 
 <div class="loading" id="loading">
 <div class="spinner"></div>
-<p>Processing payment...</p>
+<p>Redirecting to payment...</p>
 </div>
 
 <div class="modal-buttons" id="modalButtons">
@@ -406,8 +406,12 @@ if(!pendingDownload) return;
 document.getElementById("modalButtons").style.display = "none";
 document.getElementById("loading").style.display = "block";
 
-// Open Razorpay payment page
-window.open("https://razorpay.me/@zubyanlearningcircle", "_blank");
+// Create Razorpay payment URL with pre-filled amount
+let amount = pendingDownload.price;
+let razorpayUrl = `https://razorpay.me/@zubyanlearningcircle/${amount}`;
+
+// Open Razorpay payment page with exact amount pre-filled
+window.open(razorpayUrl, "_blank");
 
 // Auto-verify and download after 3 seconds
 setTimeout(()=>{
