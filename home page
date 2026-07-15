@@ -1,0 +1,25 @@
+zubyanlearningcircle/
+│
+├── index.html          ← Home page
+├── about.html          ← About Us
+├── courses.html        ← Courses
+├── notes.html          ← Study Materials
+├── previous-papers.html
+├── mock-tests.html
+├── contact.html
+├── faq.html
+├── README.md
+│
+├── css/
+│   └── style.css
+│
+├── js/
+│   └── script.js
+│
+├── images/
+│   ├── logo.png
+│   ├── banner.jpg
+│   └── icons...
+│
+└── pdf/
+    └── sample.pdf
