@@ -2,16 +2,11 @@ body{background-color:lightblue;
      h1{color:green;}
      nav {
           background-color:darkblue;
-          padding:15px;
+          padding:150px;
      }
      nav a {
           color:red;
           text-decoration:none;
           margin-right:20px;
-     }
-     nav a {
-          color:white;
-          text-decoration:red;
-          margin-right:200px;
      }
      
