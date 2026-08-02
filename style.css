@@ -1,4 +1,6 @@
-body{background-color:lightblue;
+body{
+     font-size:28px;
+     background-color:lightblue;
      h1{color:green;}
      nav {font-size:22px;
           background-color:green;
