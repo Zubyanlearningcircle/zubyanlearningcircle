@@ -1,22 +1,114 @@
+
 body{
-     font-size:28px;
-     background-color:lightblue;
+
+    margin:0;
+
+    font-family:Arial;
+
+    background:#ffffff;
+
 }
-     h1{color:green;}
-     nav {font-size:40px;
-          background-color:green;
-          padding:15px;
-     }
+
+header{
+
+    background:#008000;
+
+    color:white;
+
+    padding:20px;
+
+}
+
+nav a{
+
+    color:white;
+
+    text-decoration:none;
+
+    margin-right:20px;
+
+}
+
+.container{
+
+    display:flex;
+
+    max-width:1300px;
+
+    margin:auto;
+
+}
+
+.content{
+
+    width:75%;
+
+    padding:20px;
+
+}
+
 .sidebar{
-     width:300px;
-     float:right;
-     margin:20px;
-     background:green;
-     padding:15px;
-     border-radius:8px;
+
+    width:25%;
+
+    background:#f3f3f3;
+
+    padding:20px;
+
+    border-left:2px solid #ddd;
+
 }
-.academic current affairs{
-     border-bottom:1px solid #ccc;
-     padding-bottom:10px;
-     margin-bottom:10px;
+
+.blog-post{
+
+    background:white;
+
+    padding:15px;
+
+    border-radius:10px;
+
+    box-shadow:0 0 10px #ccc;
+
+}
+
+.blog-post h3{
+
+    color:green;
+
+}
+
+.blog-post a{
+
+    text-decoration:none;
+
+    color:blue;
+
+    font-weight:bold;
+
+}
+
+.hero{
+
+    padding:20px 0;
+
+}
+
+button{
+
+    background:green;
+
+    color:white;
+
+    border:none;
+
+    padding:12px 20px;
+
+    cursor:pointer;
+
+}
+
+button:hover{
+
+    background:darkgreen;
+
 }
