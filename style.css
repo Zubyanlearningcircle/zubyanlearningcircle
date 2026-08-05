@@ -7,3 +7,12 @@ body{
           background-color:green;
           padding:15px;
      }
+.sidebar{
+     width:300px;
+     float:right;
+     margin:20px;
+     background:green;
+     padding:15px;
+     border-radius:8px;
+}
+
