@@ -1,48 +1,48 @@
-# Razorpay ₹10 payment integration (simple)
+# Deploying to Heroku
 
-This adds a minimal Flask backend and frontend to sell PDFs using Razorpay checkout or razorpay.me links.
+Quick steps to deploy this Flask app to Heroku (easy):
 
-Two payment modes are supported:
+1. Install the Heroku CLI and login:
 
-- Automated Checkout (recommended): uses Razorpay API keys to create orders and verify signatures. Configure RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET as environment variables and create products in products.json without a payment_link.
+   https://devcenter.heroku.com/articles/heroku-cli
 
-- Payment Link mode (no API keys required): use a razorpay.me link (like https://razorpay.me/@zubyanlearningcircle) and set the `payment_link` field on a product. The frontend will open the link in a new tab. After completing payment, the buyer should click "I have paid" and paste their Razorpay payment id (e.g., pay_XXXX) to get the download. This is a simple user-driven flow and does not automatically verify the payment with Razorpay.
+   heroku login
 
-Quick start:
+2. From the repo root, create a Heroku app (or use the dashboard):
 
-1. Install dependencies
+   heroku create your-app-name
 
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
+   This will create an app at https://your-app-name.herokuapp.com
 
-2. If using Automated Checkout, set Razorpay credentials (you will get these from Razorpay dashboard):
+3. Set environment variables (Config Vars) on Heroku (either via CLI or the dashboard):
 
-   export RAZORPAY_KEY_ID="your_key_id"
-   export RAZORPAY_KEY_SECRET="your_key_secret"
+   heroku config:set RAZORPAY_KEY_ID="<your_key_id>" RAZORPAY_KEY_SECRET="<your_key_secret>" RAZORPAY_WEBHOOK_SECRET="<your_webhook_secret>"
 
-3. Add your PDFs into the `pdfs/` folder and update `products.json` with entries like:
+   - If you are only using razorpay.me links and webhooks, you only need RAZORPAY_WEBHOOK_SECRET. RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are only needed for automated Checkout flows.
 
-   {
-     "id": "pdf1",
-     "title": "My Notes",
-     "filename": "mynotes.pdf",
-     "amount": 1000,
-     "payment_link": "https://razorpay.me/@zubyanlearningcircle"
-   }
+4. Push the branch to Heroku / Deploy:
 
-   Amount is in paise (1000 = ₹10). If `payment_link` is present the UI will use the payment link mode for that product.
+   # If your local git remote is set to Heroku
+   git push heroku add-razorpay-payment:main
 
-4. Run the app
+   Or connect the GitHub repo to Heroku via dashboard and choose the add-razorpay-payment branch to deploy.
 
-   python app.py
+5. Configure the Razorpay webhook URL:
 
-5. Open http://localhost:5000 and click Pay. For payment link products: the payment page opens in a new tab and then use "I have paid" to paste the payment id and download.
+   In Razorpay dashboard -> Webhooks, set the webhook URL to:
 
-Notes:
-- This is a simple example for development and demonstration. For production:
-  - Run behind a proper WSGI server (gunicorn)
-  - Use HTTPS
-  - Securely store your Razorpay keys (do not commit them to the repo)
-  - Consider expiring download links or using signed URLs
-  - If you want automatic verification with payment links, provide API keys and use Razorpay webhooks / Order APIs to verify server-side.
+     https://your-app-name.herokuapp.com/webhook/razorpay
+
+   Content type: application/json
+   Webhook Secret: use the same secret you set in RAZORPAY_WEBHOOK_SECRET
+
+6. (Optional) Upload PDFs and products.json updates:
+
+   - Add your PDF files to the `pdfs/` folder and add entries to `products.json` with the `filename`, `id`, `title`, `amount` and optional `payment_link` fields.
+   - Commit & push changes to the branch and redeploy.
+
+Notes
+- Heroku's filesystem is ephemeral. Files added to /pdfs in the repo at build time will be present, but any runtime uploads will be lost on dyno restart. For production, store PDFs in S3 and update the download flow to serve from S3.
+- Heroku free tier may sleep your dyno; use a paid dyno for consistent uptime.
+
+Alternative (quick testing): Use ngrok locally for webhook testing (see README).
