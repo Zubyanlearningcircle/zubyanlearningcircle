@@ -1,0 +1,12 @@
+{
+  "- Note": "Add your PDFs into the 'pdfs/' folder and add entries into products.json following the example",
+  "products_example": [
+    {
+      "id": "pdf1",
+      "title": "Sample PDF",
+      "filename": "sample.pdf",
+      "amount": 1000,
+      "payment_link": "https://razorpay.me/@zubyanlearningcircle"
+    }
+  ]
+}
