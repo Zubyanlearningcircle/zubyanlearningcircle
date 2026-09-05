@@ -16,7 +16,7 @@ app = Flask(__name__)
 RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET")
 if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
-    print("WARNING: RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are not set. Set them as environment variables.")
+    print("WARNING: RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are not set. Set them as environment variables if you want automated Checkout flow.")
 
 client = razorpay.Client(auth=(RAZORPAY_KEY_ID or "", RAZORPAY_KEY_SECRET or ""))
 
@@ -27,7 +27,7 @@ os.makedirs(PDF_DIR, exist_ok=True)
 if not os.path.exists(PRODUCTS_FILE):
     # Create a simple example products.json
     example = [
-        {"id": "pdf1", "title": "Sample PDF", "filename": "sample.pdf", "amount": 1000}
+        {"id": "pdf1", "title": "Sample PDF", "filename": "sample.pdf", "amount": 1000, "payment_link": "https://razorpay.me/@zubyanlearningcircle"}
     ]
     with open(PRODUCTS_FILE, "w") as f:
         json.dump(example, f, indent=2)
@@ -118,6 +118,35 @@ def verify():
     cur.execute(
         "INSERT INTO payments (id, product_id, razorpay_order_id, razorpay_payment_id, razorpay_signature, amount) VALUES (?, ?, ?, ?, ?, ?)",
         (payment_id, product_id, razorpay_order_id, razorpay_payment_id, razorpay_signature, PRODUCTS[product_id]["amount"]),
+    )
+    conn.commit()
+    conn.close()
+
+    download_url = url_for("download", product_id=product_id, payment_id=payment_id, _external=True)
+    return jsonify({"success": True, "download_url": download_url})
+
+@app.route("/record_manual_payment", methods=["POST"])
+def record_manual_payment():
+    """
+    Record a manual payment made via a razorpay.me link. This does NOT verify the payment with Razorpay
+    (because API keys are not required for payment links). The user must paste their Razorpay payment id
+    (like pay_DBxxxyyy) as proof. This is a convenience helper only.
+    """
+    data = request.get_json() or {}
+    product_id = data.get("product_id")
+    external_payment_id = data.get("external_payment_id")
+
+    if not product_id or not external_payment_id:
+        return jsonify({"error": "Missing product_id or external_payment_id"}), 400
+    if product_id not in PRODUCTS:
+        return jsonify({"error": "Invalid product_id"}), 400
+
+    payment_id = str(uuid.uuid4())
+    conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO payments (id, product_id, razorpay_order_id, razorpay_payment_id, razorpay_signature, amount) VALUES (?, ?, ?, ?, ?, ?)",
+        (payment_id, product_id, '', external_payment_id, '', PRODUCTS[product_id]["amount"]),
     )
     conn.commit()
     conn.close()

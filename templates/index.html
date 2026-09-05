@@ -9,6 +9,7 @@
       .product { border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 6px; }
       .price { font-weight: bold; }
       button { background:#0069d9; color:#fff; padding: 0.5rem 1rem; border: none; border-radius:4px; cursor:pointer }
+      .muted { color:#666; font-size:0.9rem }
     </style>
   </head>
   <body>
@@ -18,7 +19,13 @@
       <div class="product" data-id="{{ p.id }}">
         <h2>{{ p.title }}</h2>
         <p class="price">Price: ₹{{ (p.amount / 100) | round(2) }}</p>
-        <button onclick="buy('{{ p.id }}')">Buy for ₹{{ (p.amount / 100) | round(2) }}</button>
+        {% if p.payment_link %}
+          <p class="muted">This product uses a Razorpay payment link. Click Pay to open the payment page.</p>
+          <button onclick="openPaymentLink('{{ p.payment_link }}')">Pay via Razorpay</button>
+          <button style="margin-left:8px;background:#28a745" onclick="manualPaid('{{ p.id }}')">I have paid — enter payment id</button>
+        {% else %}
+          <button onclick="buy('{{ p.id }}')">Buy for ₹{{ (p.amount / 100) | round(2) }}</button>
+        {% endif %}
       </div>
       {% endfor %}
     </div>
@@ -26,6 +33,27 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
       const RAZORPAY_KEY_ID = "{{ razorpay_key_id or '' }}";
+
+      function openPaymentLink(link){
+        window.open(link, '_blank');
+        alert('Payment page opened in a new tab. After completing payment, click "I have paid" and paste the Razorpay payment id (e.g., pay_XXXX).');
+      }
+
+      async function manualPaid(productId){
+        const external = prompt('Enter your Razorpay payment id shown after payment (e.g., pay_DBxxxx):');
+        if (!external) return;
+        const res = await fetch('/record_manual_payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ product_id: productId, external_payment_id: external })
+        });
+        const data = await res.json();
+        if (data.success){
+          window.location = data.download_url;
+        } else {
+          alert(data.error || 'Could not record payment');
+        }
+      }
 
       async function buy(productId){
         // Create order on server
