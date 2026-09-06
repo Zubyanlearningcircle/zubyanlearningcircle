@@ -105,3 +105,6 @@ mark{ background: linear-gradient(90deg, rgba(255,215,150,0.35), rgba(78,205,196
 @media (max-width:900px){ .container{ flex-direction:column } .content, .sidebar{ width:100% } .article{ margin:16px 12px } }
 /* accessibility contrasts for nav on small displays */
 @media (prefers-reduced-motion:reduce){ *{ transition:none!important } }
+a  {
+   text-decoration:  none;
+}
